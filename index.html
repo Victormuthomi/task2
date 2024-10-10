@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axios</title>
+</head>
+<body>
+    <h1>Axios task</h1>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+   <script>
+       //get request with axios
+       //first declare the api for the data request
+       const url ="https://fakestoreapi.com/products";
+
+       //the function to get data from the api
+       const firstRequest = () => {
+           const fetchData = async () => {  //Async returns a promise 
+               try {                            //use the try and catch for the fetch data function
+                   const response = await axios(url);      //await waits untill the data has been fetched from the api and can only be used inside async function
+                       const data = response.data;      //get the data from the response
+                       console.log(data);
+                   } catch (error) {
+                       console.log(error.response);           //return a error at the console if there is an error accesing the api
+                   }
+           };
+           fetchData();   //run the fetchdata functopn first
+       }
+       firstRequest();    //run the first request function 
+
+  //     request headers 
+    //   using dad joke api to get a random joke
+  const url ="https://icanhazdadjoke.com/";
+
+      const headers = () => {
+          const fetchData1 = async () => {
+              try {
+                  const response = await axios(url, {
+                      headers : {                         //have an header to acccept json format since the data from the api is in difffernt formats 
+                          Accept : 'application/json'
+                 },
+              });
+                  const data = response.data;
+                  console.log(data.joke);
+              } catch (error) {
+                  console.log(error.response);
+              }
+          }
+          fetchData1();
+      }
+       headers(); 
+
+     //  post request
+        const url2 = "https://fakestoreapi.com/users";
+
+       //use user data to hold the information you want to send on the server 
+       const userData = {
+           name : 'john',
+           email : 'johndoe@gmail.com'
+       };
+
+     //  the function to make the post request
+       const addUser = () => {
+           const postUserData = async () => {
+               try {
+                   const response = await axios.post(url2, userData, {
+                       headers : {
+                          ' Content-Type' : 'application/json' //use content type to specify the content that you are posting
+                      }
+                   });
+                   const data = response.data;
+                   console.log('User added: ', data);
+              } catch (error) {
+                   console.log(error.response);
+               }
+           };
+           postUserData();
+      }
+       addUser();
+
+       //global defaults
+       //allows you to confiqure default settinf for all the requests made with axioss to avoid repetetion
+       axios.defaults.baseURL = 'https://fakestoreapi.com'; // nb:  we use axios.defaults.' ' to specify the defualt we are setting eg this is the default baseURL
+       axios.defaults.headers.get['Accept'] = 'application/json'; //specifies that the default format is json format
+       axios.defaults.headers.post['Content-Type'] = 'application/json'; //specifies that the defualt content for the post request is json format 
+       axios.defaults.timeout = 5000; //specifies the default time 
+
+       const carts = async () => {
+           try {
+               const response = await axios('/carts'); //specify the relative path since you have a baseURL
+               const data = response.data;
+               console.log(data);
+           }catch (error) {
+               console.log(error.response);
+           }
+       };
+       carts ();
+
+
+       //custom instance 
+       //allows one to set default configirations for specific use cases without affecting other axio requests 
+       //we use const name = axios.creat({
+       //then the defaukts inside of here 
+       //then after the custom defaults we add our functions 
+
+       //example 
+
+       const clientAPI = axios.create({
+           baseURL  :'https://fakestoreapi.com',
+           timeout :  5000,
+           headers : {
+               'Accept' : 'application/json',
+               'Content-Type' : 'application/json'
+           }
+       });
+
+       //the functions here now 
+       const getProducts = async () => {
+           try {
+               const response = await clientAPI.get('/products');
+               const data = response.data;
+               console.log(data);
+           } catch (error) {
+               console.log(error.response);
+           }
+       };
+       getProducts();
+
+       //inteceptors 
+       //Allows on to run custom logic or modify requests and responses  
+       //format
+       /* axios.interceptors.request.use(
+         (config) => {
+            logic here 
+            return the config
+            */
+       //on response you just change the request to axios the syntax is the same 
+        const authFetch = axios.create({
+            baseURL : 'https://fakestoreapi.com',
+        });
+
+       authFetch.interceptors.request.use(
+          (request) => {
+               request.headers.common['Accept'] = 'application/json';
+               console.log('request sent');
+               return request
+           }, (error) => {
+               return Promise.reject(error)
+           })
+
+       //response interceptor 
+       authFetch.interceptors.response.use(
+           (response) => {
+           console.log('got response');
+           return response
+       }, (error) => {
+           console.log(error.response);
+           return response
+       })
+   </script> 
+</body>
+</html>
